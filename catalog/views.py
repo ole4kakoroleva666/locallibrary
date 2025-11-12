@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.views import generic
 from .models import Book, Author, BookInstance, Genre
 
+    # """
+    # Функция отображения для домашней страницы сайта.
+    # """
 def index(request):
-    """
-    Функция отображения для домашней страницы сайта.
-    """
+
     keyword = "man"
     num_books_keyword = Book.objects.filter(title__icontains=keyword).count()
 
@@ -19,6 +20,9 @@ def index(request):
     num_instances_available=BookInstance.objects.filter(status__exact='a').count()
     num_authors=Author.objects.count()  # Метод 'all()' применён по умолчанию.
 
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
+
     # Отрисовка HTML-шаблона index.html с данными внутри
     # переменной контекста context
     return render(
@@ -26,7 +30,8 @@ def index(request):
         'index.html',
         context={'num_books':num_books,'num_instances':num_instances,'num_instances_available':num_instances_available,'num_authors':num_authors,
                  "num_books_keyword" : num_books_keyword, "keyword":keyword,
-                 "num_genre_keywordforgenre" : num_genre_keywordforgenre, "num_genre_keywordforgenre":num_genre_keywordforgenre},
+                 "num_genre_keywordforgenre" : num_genre_keywordforgenre, "num_genre_keywordforgenre":num_genre_keywordforgenre,
+                'num_visits':num_visits}, # num_visits appended
     )
 
 class BookListView(generic.ListView):
