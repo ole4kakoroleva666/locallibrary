@@ -24,12 +24,10 @@ def index(request):
     keywordforgenre = "fan"
     num_genre_keywordforgenre = Genre.objects.filter(name__icontains=keywordforgenre).count()
 
-    # Генерация "количеств" некоторых главных объектов
     num_books=Book.objects.all().count()
     num_instances=BookInstance.objects.all().count()
-    # Доступные книги (статус = 'a')
     num_instances_available=BookInstance.objects.filter(status__exact='a').count()
-    num_authors=Author.objects.count()  # Метод 'all()' применён по умолчанию.
+    num_authors=Author.objects.count()
 
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
@@ -41,7 +39,7 @@ def index(request):
         context={'num_books':num_books,'num_instances':num_instances,'num_instances_available':num_instances_available,'num_authors':num_authors,
                  "num_books_keyword" : num_books_keyword, "keyword":keyword,
                  "num_genre_keywordforgenre" : num_genre_keywordforgenre, "num_genre_keywordforgenre":num_genre_keywordforgenre,
-                'num_visits':num_visits}, # num_visits appended
+                'num_visits':num_visits},
     )
 
 class BookListView(generic.ListView):
@@ -98,7 +96,6 @@ def renew_book_librarian(request, pk):
             # redirect to a new URL:
             return HttpResponseRedirect(reverse('all-borrowed'))
 
-    # If this is a GET (or any other method) create the default form.
     else:
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
         form = RenewBookModelForm(initial={'renewal_date': proposed_renewal_date})
@@ -116,22 +113,16 @@ def renew_book_librarian(request, pk):
     """View function for renewing a specific BookInstance by librarian."""
     book_instance = get_object_or_404(BookInstance, pk=pk)
 
-    # If this is a POST request then process the Form data
     if request.method == 'POST':
 
-        # Create a form instance and populate it with data from the request (binding):
         form = RenewBookModelForm(request.POST)
 
-        # Check if the form is valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
             book_instance.due_back = form.cleaned_data['renewal_date']
             book_instance.save()
 
-            # redirect to a new URL:
             return HttpResponseRedirect(reverse('all-borrowed'))
 
-    # If this is a GET (or any other method) create the default form.
     else:
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
         form = RenewBookModelForm(initial={'renewal_date': proposed_renewal_date})
@@ -151,7 +142,6 @@ class AuthorCreate(PermissionRequiredMixin, CreateView):
 
 class AuthorUpdate(PermissionRequiredMixin, UpdateView):
     model = Author
-    # Not recommended (potential security issue if more fields added)
     fields = '__all__'
     permission_required = 'catalog.change_author'
 
@@ -174,14 +164,12 @@ class BookCreate(PermissionRequiredMixin, CreateView):
     fields = ['title', 'author', 'summary', 'isbn', 'genre']
     permission_required = 'catalog.add_book'
 
-# Update Book
 class BookUpdate(PermissionRequiredMixin, UpdateView):
     model = Book
-    fields = '__all__'  # или перечислить конкретные поля
+    fields = '__all__'
     permission_required = 'catalog.change_book'
 
-# Delete Book
 class BookDelete(PermissionRequiredMixin, DeleteView):
     model = Book
-    success_url = reverse_lazy('books')  # после удаления переходим на список книг
+    success_url = reverse_lazy('books')
     permission_required = 'catalog.delete_book'
