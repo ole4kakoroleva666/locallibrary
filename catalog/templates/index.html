@@ -16,5 +16,12 @@
     <li><strong>Books with keyword {{ keyword }}:</strong> {{ num_books_keyword }}</li>
     <li><strong>Books with keywordforgenre {{ keywordforgenre }}:</strong> {{   num_genre_keywordforgenre }}</li>
   </ul>
+    
+    <p>
+  You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{%
+  else %} times{% endif %}.
+    </p>
 
 {% endblock %}
+
+
